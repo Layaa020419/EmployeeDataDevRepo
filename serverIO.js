@@ -40,11 +40,12 @@ router.post('/voicecommand', function (req, res, next) {
 				filterString = stringPropertyManipulation(property, parameters, filterString, true);
 				console.log(filterString);
 				break;
-				case "Salary":
+			case "Salary":
 				filterString = numericalPropertyManipulation(property, parameters, filterString, 'amount');
 				console.log(filterString);
 				break;
-				case "Experience":
+			case "Experience":
+				experienceManipulation(property, parameters);
 				filterString = numericalPropertyManipulation(property, parameters, filterString, 'amount');
 				console.log(filterString);
 				break;
@@ -67,13 +68,40 @@ router.post('/voicecommand', function (req, res, next) {
 	res.send({ "fulfillmentText": "Sure", "fulfillmentMessages": [{ "text": { "text": ["Sure"] } }], "source": "webhook sample" });
 });
 
-function experienceManipulation(property, parameters, filterString){
-
+function experienceManipulation(property, parameters) {
+	// 	's', min', 'h', 'mo','yr','decade', 'century'
+	if (!Array.isArray(parameters[property])) {
+		parameters[property] = [parameters[property]];
+	}
+	//assuming min experience ask starts from months and dialogflow max clubbed unit = century
+	//converting all amounts to unit of years
+	parameters[property].forEach(prop => {
+		switch (prop['unit']) {
+			case 'decade':
+				prop['amount'] = prop['amount'] * 10;
+				break;
+			case 'century':
+				prop['amount'] = prop['amount'] * 100;
+				break;
+			case 'mo':
+				prop['amount'] = prop['amount'] / 12;
+				break;
+		}
+		prop['unit']='yr';
+	});
+	//original parameters object gets edited - no need to return
 }
 
 function numericalPropertyManipulation(property, parameters, filterString, propertyTag) {
 	var tempStringFilter = {};
-	switch (parameters.numCompare) {
+	var numCompareType;
+	if (Array.isArray(parameters[property])) {
+		numCompareType = parameters.numCompare.shift();
+	}
+	else {
+		numCompareType = parameters.numCompare;
+	}
+	switch (numCompareType) {
 		case 'lesser':
 			tempStringFilter = []
 			if (Array.isArray(parameters[property])) {
