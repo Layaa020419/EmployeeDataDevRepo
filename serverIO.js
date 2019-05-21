@@ -95,7 +95,7 @@ function experienceManipulation(property, parameters) {
 function numericalPropertyManipulation(property, parameters, filterString, propertyTag) {
 	var tempStringFilter = {};
 	var numCompareType;
-	if (Array.isArray(parameters[property])) {
+	if (Array.isArray(parameters.numCompare)) {
 		numCompareType = parameters.numCompare.shift();
 	}
 	else {
